@@ -1,5 +1,6 @@
 Game: Pyromax Dax
 
+Ported by: John Roy L. Calimlim
 Code: Richard Eric M. Lope BSN, RN (Relminator)
 
 GFX: Marc Russell (spicypixel.net)
