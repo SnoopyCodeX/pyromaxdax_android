@@ -1,6 +1,21 @@
+====================[PORTED GAME]=====================
 Game: Pyromax Dax
 
-Ported by: John Roy L. Calimlim
+Ported by: John Roy L. Calimlim [SnoopyCodeX](CyberDroid Developers PH)
+Status: W.I.P. (Unstable)
+
+Start Date: 8th of August 2020
+End Date: ---
+
+Platform: Android
+Version: ---
+
+Tools:
+	OpenGL ES
+	Easy GL2D Library (Relminator)
+	Java
+===================[ORIGINAL GAME]====================
+Game: Pyromax Dax
 Code: Richard Eric M. Lope BSN, RN (Relminator)
 
 GFX: Marc Russell (spicypixel.net)
