@@ -16,8 +16,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
-
 import javax.microedition.khronos.opengles.GL10;
+import com.relminator.cdph.pmdx.object.Globals;
 
 //CCW
 //6 verts per quad
@@ -33,21 +33,6 @@ public class SpriteBatcher
 	
 	public static float DEG_TO_RAD = (float)Math.PI / 180.0f ; 
 	public static float RAD_TO_DEG = 180 / (float) Math.PI;
-	
-	private IntBuffer vertexBuffer;	
-	private ShortBuffer indexBuffer;
-	
-	
-	private int numSprites;
-	private int maxSize;
-	private int index;
-	
-	private float[] vertices; 
-	
-	private int[] tempBuffer;
-	
-	private ByteBuffer vertexByteBuffer;
-	private final int vertexStride = 8 * 4; // (2 v + 4c + 2 u) * 4 verts
 	
 	public float CubeVectors[] = {
 		(-0.5f), (-0.5f), ( 0.5f),
@@ -68,6 +53,23 @@ public class SpriteBatcher
 		3, 0, 4, 7,
 		4, 5, 6, 7
 	};
+
+	private int current_texture;
+	
+	private IntBuffer vertexBuffer;	
+	private ShortBuffer indexBuffer;
+	
+	
+	private int numSprites;
+	private int maxSize;
+	private int index;
+	
+	private float[] vertices; 
+	
+	private int[] tempBuffer;
+	
+	private ByteBuffer vertexByteBuffer;
+	private final int vertexStride = 8 * 4; // (2 v + 4c + 2 u) * 4 verts
 	
 	public SpriteBatcher()
 	{
@@ -111,7 +113,6 @@ public class SpriteBatcher
 		
 		
 	}
-	
 	
 	public void sprite( float x, float y, int flipmode, SpriteGL sprite )
 	{
@@ -1016,27 +1017,43 @@ public class SpriteBatcher
 		numSprites++; 
 	
 	}
-
-	//3D Sprites
+	
 	public void sprite3D(float x, float y, float z, int flipMode, SpriteGL sprite)
 	{
+		//spriteOnQuad({x,y}, {x,y}, {x,y}, {x,y}, {r,g,b,a}, flipMode, sprite);
 		float x1 = x;
 		float y1 = y;
 		float x2 = x + sprite.width;
 		float y2 = y + sprite.height;
 		
+		spriteOnQuad(x1, y1, 
+					 x1, y2, 
+					 x2, y2, 
+					 x2, y1, 
+					 255, 255, 255, 255, 
+					 flipMode, 
+					 sprite);
+	}
+	
+	public void spriteRotateScaleXY3D(int x, int y, int z, int angle, float scaleX, float scaleY, int flipMode, SpriteGL sprite)
+	{
+		int sHalfX = sprite.width / 2;
+		int sHalfY = sprite.height / 2;
+		int x1 = -sHalfX;
+		int y1 = -sHalfY;
+		int x2 = sHalfX;
+		int y2 = sHalfY;
+		
 		
 	}
 	
-	public void render( GL10 gl, int textureID )
+	public void render(GL10 gl, int textureID)
 	{
-		
-		if( numSprites < 1 ) return;
+		if(numSprites < 1) 
+			return;
 		
 		gl.glBindTexture( GL10.GL_TEXTURE_2D, textureID );
-		
 		fillBuffers();
-		
 		
 		gl.glEnableClientState( GL10.GL_VERTEX_ARRAY );
 		vertexBuffer.position(0);
@@ -1054,7 +1071,6 @@ public class SpriteBatcher
 		indexBuffer.position(0);
 		
 		gl.glDrawElements( GL10.GL_TRIANGLES, numSprites * 6, GL10.GL_UNSIGNED_SHORT, indexBuffer );
-		
 		gl.glDisableClientState( GL10.GL_TEXTURE_COORD_ARRAY );
 		gl.glDisableClientState( GL10.GL_COLOR_ARRAY );
 		gl.glDisableClientState( GL10.GL_VERTEX_ARRAY );
@@ -1063,9 +1079,103 @@ public class SpriteBatcher
 	    this.numSprites = 0;
 		
 		vertexBuffer.clear();
-		
 	}
+	
+	public static void ClearScreen(GL10 gl)
+	{
+		gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
+	}
+	
+	public static void Begin2D(GL10 gl)
+	{
+		gl.glDisable(GL10.GL_DEPTH_TEST);
+		gl.glDisable (GL10.GL_CULL_FACE);
 
+		gl.glEnable(GL10.GL_BLEND);   	    
+		gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+
+		gl.glDisable( GL10.GL_DEPTH_TEST );
+
+		gl.glEnable( GL10.GL_ALPHA_TEST );
+		gl.glAlphaFunc(GL10.GL_GREATER, 0);
+
+
+		gl.glDisable(GL10.GL_STENCIL_TEST);
+		gl.glDisable(GL10.GL_TEXTURE);
+		gl.glDisable(GL10.GL_LIGHTING);
+		//gl.glDisable(GL10.GL_LOGIC_OP);
+		gl.glDisable(GL10.GL_DITHER);
+		gl.glDisable(GL10.GL_FOG);
+
+		gl.glHint(GL10.GL_POINT_SMOOTH_HINT, GL10.GL_FASTEST);
+		gl.glHint(GL10.GL_LINE_SMOOTH_HINT , GL10.GL_FASTEST);
+
+		gl.glPointSize( 1 );
+		gl.glLineWidth( 1 );
+
+		gl.glMatrixMode(GL10.GL_PROJECTION); 
+		gl.glPushMatrix();
+		gl.glLoadIdentity();
+		gl.glOrthof(0, Globals.SCREEN_WIDTH, Globals.SCREEN_HEIGHT, 0, -1, 1);
+		gl.glMatrixMode(GL10.GL_MODELVIEW);
+		gl.glPushMatrix();
+		gl.glLoadIdentity();
+		gl.glTranslatef(0.375f, 0.375f, 0f);
+	}
+	
+	public static void End2D(GL10 gl)
+	{
+		gl.glMatrixMode(GL10.GL_PROJECTION);
+		gl.glPopMatrix();
+		gl.glMatrixMode(GL10.GL_MODELVIEW);
+		gl.glPopMatrix();
+
+		SetBlendMode(gl, GLBlendMode.BLEND_SOLID);
+		gl.glColor4x(255,255,255,255);
+	}
+	
+	public static void SetBlendMode(GL10 gl, GLBlendMode blendMode)
+	{
+		if(blendMode == GLBlendMode.BLEND_TRANS)
+		{
+			gl.glDisable(GL10.GL_BLEND);
+			gl.glEnable(GL10.GL_ALPHA_TEST);
+		}
+		else if(blendMode == GLBlendMode.BLEND_SOLID)
+		{
+			gl.glDisable(GL10.GL_BLEND);
+			gl.glDisable(GL10.GL_ALPHA_TEST);
+		}
+		else if(blendMode == GLBlendMode.BLEND_BLENDED)
+		{
+			gl.glEnable(GL10.GL_BLEND);
+			gl.glEnable(GL10.GL_ALPHA_TEST);
+			gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE);
+		}
+		else if(blendMode == GLBlendMode.BLEND_GLOW)
+		{
+			gl.glEnable(GL10.GL_BLEND);
+			gl.glEnable(GL10.GL_ALPHA_TEST);
+			gl.glBlendFunc(GL10.GL_ONE, GL10.GL_ONE);
+		}
+		else if(blendMode == GLBlendMode.BLEND_ALPHA)
+		{
+			gl.glEnable(GL10.GL_BLEND);
+			gl.glEnable(GL10.GL_ALPHA_TEST);
+			gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+		}
+		else if(blendMode == GLBlendMode.BLEND_BLACK)
+		{
+			gl.glEnable(GL10.GL_BLEND);
+			gl.glEnable(GL10.GL_ALPHA_TEST);
+			gl.glBlendFunc(GL10.GL_ZERO, GL10.GL_ONE_MINUS_SRC_ALPHA);
+		}
+		else
+		{
+			gl.glDisable(GL10.GL_BLEND);
+			gl.glEnable(GL10.GL_ALPHA_TEST);
+		}
+	}
 
 	public int getNumSprites()
 	{
@@ -1075,6 +1185,15 @@ public class SpriteBatcher
 	public void setNumSprites(int numSprites)
 	{
 		this.numSprites = numSprites;
+	}
+	
+	public enum GLBlendMode {
+		BLEND_TRANS, 
+		BLEND_SOLID,
+		BLEND_BLENDED,
+		BLEND_GLOW,
+		BLEND_ALPHA,
+		BLEND_BLACK
 	}
 
 	// ************************************************************************

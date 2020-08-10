@@ -6,10 +6,8 @@ import net.phatcode.rel.math.Vector3D;
 public class Particles
 {
 	public static final int MAX_PARTICLES = 511;
-	public Part[] particles = new Part[MAX_PARTICLES];
+	public Particle[] particles = new Particle[MAX_PARTICLES];
 	public int ActiveParticles;
-	
-	
 	
 	public final class ExplodeType
 	{
@@ -18,14 +16,14 @@ public class Particles
 		public static final int LARGE = 2;
 	}
 	
-	public final class Part
+	public final class Particle
 	{
 		public Vector3D Position, Direction;
 		public int TimeActive, Tima, Red, Green, Blue, Angle, DeathID;
 		public boolean Active;
 		public float Speed, Alpha;
 		
-		public Part()
+		public Particle()
 		{
 			Active = false;
 			Speed = 8.0f;
@@ -34,7 +32,7 @@ public class Particles
 			DeathID = ExplodeType.TINY;
 		}
 		
-		public Part spawn(Vector3D pos, Vector3D dir, int ID)
+		public Particle spawn(Vector3D pos, Vector3D dir, int ID)
 		{
 			Active = true;
 			Speed = (float) Math.random() * (10 + ID * 10) + (float) Math.random() * (10 + ID * 10);
@@ -68,7 +66,7 @@ public class Particles
 			return this;
 		}
 		
-		public Part spawn(Vector3D pos, int angle, int ID)
+		public Particle spawn(Vector3D pos, int angle, int ID)
 		{
 			Active = true;
 			Speed = (float) Math.random() * (10 + ID * 10) + (float) Math.random() * (10 + ID * 10);
@@ -102,7 +100,7 @@ public class Particles
 			return this;
 		}
 		
-		public Part spawn(Vector3D pos, Vector3D dir, float speed, int ID)
+		public Particle spawn(Vector3D pos, Vector3D dir, float speed, int ID)
 		{
 			Active = true;
 			Speed = speed;
@@ -136,7 +134,7 @@ public class Particles
 			return this;
 		}
 		
-		public Part update()
+		public Particle update()
 		{
 			Position.add(Direction.mul(Speed));
 			Alpha -= 10;

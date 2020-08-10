@@ -4,6 +4,13 @@ import android.content.Context;
 import javax.microedition.khronos.opengles.GL10;
 
 import com.relminator.cdph.pmdx.R;
+import com.relminator.cdph.pmdx.entity.Player;
+import com.relminator.cdph.pmdx.object.Camera;
+import com.relminator.cdph.pmdx.object.Globals;
+import com.relminator.cdph.pmdx.object.Map;
+import com.relminator.cdph.pmdx.object.Particles;
+import com.relminator.cdph.pmdx.object.Tile3D;
+
 import net.phatcode.rel.utils.AABB;
 import net.phatcode.rel.utils.AndroidFileIO;
 import net.phatcode.rel.utils.ImageAtlas;
@@ -110,16 +117,126 @@ public class Engine
 		SEASON_SPRING
 	}
 	
+	public class WarpInfo
+	{
+		public int SpawnTileX;
+		public int SpawnTileY;
+		public int LevelNum;
+		public Seasons SeasonType;
+	}
+	
+	public class HighScore
+	{
+		public String name;
+		public int score;
+	}
+	
+	private GameState state;
+	private GameState prevState;
+	private GameState nextState;
+	private Seasons currentSeason;
+	private int currentLevel;
+	private boolean isBossStage;
+	private boolean bossActive;
+	private int windDirection;
+	private int windFrame;
+	private int frame;
+	private float secondsElapsed;
+	private double fps;
+	private double dt;
+	private double accumulator;
+	private Camera cam;
+	private int spawnX;
+	private int soawnY;
+	private int oldPlayerX;
+	private int oldPlayerY;
+	private int bossSpawnX;
+	private int bossSpawnY;
+	private int bossDieX;
+	private int bossDieY;
+	private int mapWidth;
+	private int mapHeight;
+	private boolean showFps;
+	private boolean noFrame;
+	private int physicalScreenWidth;
+	private int physicalScreenHeight;
+	private boolean showDialogs;
+	private int currentDialogID;
+	private int currentWarpID;
+	private int incendiaryMenuAngle;
+	private int incendiaryMenuAnimate;
+	private int pressedRight;
+	private int pressedLeft;
+	private int pressedUp;
+	private int pressedDown;
+	private int activeIncendiary;
+	private int masterVolumeBGM;
+	private int masterVolumeSFX;
+	private int hiScore;
+	private boolean debugMode;
+	private boolean drawHitBoxes; 
+	
 	public Engine(Context ctx)
 	{
 		this.context = ctx;
+		
+		state = GameState.STATE_TITLE;
+		currentLevel = 0;
+		currentSeason = Seasons.SEASON_SUMMER;
+		
+		isBossStage = false;
+		bossActive = false;
+		
+		frame = 0;
+		secondsElapsed = 0;
+		fps = 60;
+		dt = 0;
+		accumulator = 0;
+		
+		showFps = false;
+		showDialogs = true;
+		noFrame = false;
+		physicalScreenWidth = Globals.SCREEN_WIDTH;
+		physicalScreenHeight = Globals.SCREEN_HEIGHT;
+		
+		currentDialogID = 0;
+		currentWarpID = 0;
+		
+		incendiaryMenuAngle = 0;
+		incendiaryMenuAnimate = 0;
+		
+		masterVolumeBGM = 128;
+		masterVolumeSFX = 200;
+		
+		debugMode = false;
+		drawHitBoxes = false;
+		
 		this.initialize();
 	}
 	
 	private void initialize()
 	{
-		fileIO = new AndroidFileIO(context);
+		state = GameState.STATE_SPLASH;
+		prevState = GameState.STATE_TITLE;
+		nextState = GameState.STATE_TITLE;
 		
+		currentLevel = 0;
+		currentSeason = Seasons.SEASON_SUMMER;
+		
+		hiScore = 0;
+		isBossStage = false;
+		bossActive = false;
+		windDirection = 0;
+		windFrame = 0;
+		
+		frame = 0;
+		secondsElapsed = 0;
+		fps = 60;
+		dt = 0;
+		accumulator = 0;
+		showDialogs = true;
+		
+		fileIO = new AndroidFileIO(context);
 		Sonics.getInstance().loadEffect(context, R.raw.attack, SFX_ATTACK);
 		Sonics.getInstance().loadEffect(context, R.raw.bounce, SFX_BOUNCE);
 		Sonics.getInstance().loadEffect(context, R.raw.click, SFX_CLICK);
@@ -141,9 +258,21 @@ public class Engine
 		Sonics.getInstance().loadEffect(context, R.raw.yahoo, SFX_YAHOO);
 	}
 	
-	public void update()
+	public void setState(GameState state)
 	{
+		this.state = state;
+	}
+	
+	public boolean update(GL10 gl)
+	{
+		boolean done = false;
 		
+		if(state == GameState.STATE_SPLASH)
+			done = stateSplash(gl);
+		//else if(state == GameState.STATE_TITLE)
+			
+		
+		return done;
 	}
 	
 	public void drawBatchers(GL10 gl)
@@ -185,5 +314,63 @@ public class Engine
 	public TouchHandler getTouchHandler()
 	{
 		return touchHandler;
+	}
+	
+	public boolean stateSplash(GL10 gl)
+	{
+		boolean animate = true;
+		boolean done = false;
+		int delay = 60 * 5;
+		float t1 = 0;
+		float t2 = 0;
+		int numImages = 4;
+		int myFrame = 0;
+		int currentImage = 0;
+		
+		dt = Utils.getDeltaTime(fps, Utils.getSystemSeconds());
+		
+		do {
+			dt = Utils.getDeltaTime(fps, Utils.getSystemSeconds());
+			dt = (dt > Globals.FIXED_TIME_STEP) ? Globals.FIXED_TIME_STEP : dt;
+			accumulator += dt;
+			secondsElapsed += dt;
+			
+			while(accumulator >= Globals.FIXED_TIME_STEP)
+			{
+				frame += 1;
+				myFrame += 1;
+				
+				if((myFrame % delay) == 0)
+				{
+					if(currentImage < 4)
+					{
+						currentImage += 1;
+						animate = true;
+					}
+					else
+						done = true;
+				}
+				
+				if(animate)
+				{
+					t1 += 0.01;
+					if(t1 >= 1)
+					{
+						animate = false;
+						t1 = 0;
+						done = (currentImage > 3);
+					}
+				}
+				accumulator -= Globals.FIXED_TIME_STEP;
+				
+				SpriteBatcher.Begin2D(gl);
+				
+				
+				
+				SpriteBatcher.End2D(gl);
+			}
+		} while(done);
+		
+		return done;
 	}
 }

@@ -18,6 +18,27 @@ public class Utils
 	public static float DEG_TO_RAD = PI / 180.0f ; 
 	public static float RAD_TO_DEG = 180 / PI;
 	
+	public static double getDeltaTime(double fps, double timerInSeconds)
+	{
+		double framesPerSecond = 0.0;
+		double previousTime = 0.0;
+		double oldTime = 0.0;
+		double currentTime = timerInSeconds;
+		double elapsedTime = currentTime - oldTime;
+		
+		oldTime = currentTime;
+		framesPerSecond += 1;
+		
+		if((currentTime - previousTime) > 1.0)
+		{
+			previousTime = currentTime;
+			fps = framesPerSecond;
+			framesPerSecond = 0;
+		}
+		
+		return elapsedTime;
+	}
+	
 	public static float deg2Rad( float degrees )
 	{
 		return degrees * PI / 180.0f;

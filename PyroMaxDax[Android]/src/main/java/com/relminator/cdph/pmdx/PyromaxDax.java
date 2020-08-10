@@ -36,7 +36,7 @@ public class PyromaxDax extends GLSurfaceView implements Renderer
 	@Override
 	public void onDrawFrame(GL10 gl)
 	{
-		engine.update();
+		engine.update(gl);
 		engine.drawBatchers(gl);
 	}
 

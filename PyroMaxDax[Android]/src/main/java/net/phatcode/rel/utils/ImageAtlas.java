@@ -69,10 +69,14 @@ public class ImageAtlas
                 sprites[i] = new SpriteGL();
                 sprites[i].width = tileWidth;
                 sprites[i].height = tileHeight;
-                sprites[i].u1 = ix / (float)width;
-                sprites[i].v1 = iy / (float)height;
-                sprites[i].u2 = (ix + iw) / (float)width;
-                sprites[i].v2 = (iy + ih) / (float)height;
+				sprites[i].texture_width = width;
+				sprites[i].texture_height = height;
+				sprites[i].u_off = ix;
+				sprites[i].v_off = iy;
+                sprites[i].u1 = ix / (float) width;
+                sprites[i].v1 = iy / (float) height;
+                sprites[i].u2 = (ix + iw) / (float) width;
+                sprites[i].v2 = (iy + ih) / (float) height;
                   
                 i++;
                   
@@ -89,7 +93,6 @@ public class ImageAtlas
        
        GLUtils.texImage2D( GL10.GL_TEXTURE_2D, 0, bitmap, 0 );
 	   bitmap.recycle();
-       
 	}
 
 
@@ -141,6 +144,10 @@ public class ImageAtlas
                 sprites[i] = new SpriteGL();
                 sprites[i].width = tileWidth;
                 sprites[i].height = tileHeight;
+				sprites[i].texture_width = width;
+				sprites[i].texture_height = height;
+				sprites[i].u_off = ix;
+				sprites[i].v_off = iy;
                 sprites[i].u1 = ix / (float)width;
                 sprites[i].v1 = iy / (float)height;
                 sprites[i].u2 = (ix + iw) / (float)width;
@@ -180,7 +187,7 @@ public class ImageAtlas
        for( int i = 0; i < numImages; i++ )
        {
        	
-       	int j = i * 4;
+       	   int j = i * 4;
            int x = texcoords[j];
            int y = texcoords[j+1];
            int w = texcoords[j+2];
@@ -189,6 +196,10 @@ public class ImageAtlas
            sprites[i] = new SpriteGL();
            sprites[i].width = w;
            sprites[i].height = h;
+		   sprites[i].texture_width = width;
+		   sprites[i].texture_height = height;
+		   sprites[i].u_off = x;
+		   sprites[i].v_off = y;
            sprites[i].u1 = x / (float)width;
            sprites[i].v1 = y / (float)height;
            sprites[i].u2 = (x + w) / (float)width;
@@ -241,7 +252,7 @@ public class ImageAtlas
        for( int i = 0; i < numImages; i++ )
        {
        	
-       	int j = i * 4;
+       	   int j = i * 4;
            int x = texcoords[j];
            int y = texcoords[j+1];
            int w = texcoords[j+2];
@@ -250,6 +261,10 @@ public class ImageAtlas
            sprites[i] = new SpriteGL();
            sprites[i].width = w;
            sprites[i].height = h;
+		   sprites[i].texture_width = width;
+		   sprites[i].texture_height = height;
+		   sprites[i].u_off = x;
+		   sprites[i].v_off = y;
            sprites[i].u1 = x / (float)width;
            sprites[i].v1 = y / (float)height;
            sprites[i].u2 = (x + w) / (float)width;
